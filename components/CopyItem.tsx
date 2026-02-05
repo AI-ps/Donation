@@ -1,0 +1,1 @@
+// All logic moved to index.html for static hosting compatibility.
