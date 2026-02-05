@@ -21,9 +21,10 @@
 
     <style>
         :root {
-            --pink-smooth: #fdf2f8;
+            --pink-smooth: #fff5f7;
             --pink-accent: #ec4899;
             --indigo-accent: #6366f1;
+            --safe-blur: 12px;
         }
 
         body {
@@ -35,33 +36,52 @@
             padding: 0;
             cursor: default;
             color: #1f2937;
+            /* Safari 렌더링 최적화 */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* 공백 기반 줄바꿈 및 가독성 최적화 */
         .break-keep {
             word-break: keep-all;
             overflow-wrap: break-word;
+            line-break: strict;
         }
 
-        /* 반응형 텍스트 및 레이아웃 */
+        /* 4K ~ 모바일 유동형 텍스트 크기 제어 */
+        .hero-title {
+            font-size: clamp(3rem, 8vw, 8rem);
+            line-height: 1.1;
+        }
+
+        .logo-main {
+            font-size: clamp(4.5rem, 12vw, 12rem);
+        }
+
+        /* 832px 이하 모바일 최적화 */
         @media (max-width: 832px) {
             .container-padding {
-                padding-left: 1.5rem;
-                padding-right: 1.5rem;
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
             }
 
-            .hero-title {
-                font-size: 3.5rem !important;
-            }
-
-            .logo-main {
-                font-size: 6rem !important;
+            .mobile-full {
+                width: 100% !important;
+                max-width: 100% !important;
             }
         }
 
-        /* 살랑살랑 하트 낙하 애니메이션 (꽃잎 스타일) */
+        /* Safari 버벅임 방지 - GPU 가속 유도 */
+        .gpu-layer {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+            will-change: transform, opacity;
+        }
+
         @keyframes heartFlutter {
             0% {
-                transform: translate(0, -10vh) rotate(0deg);
+                transform: translate3d(0, -10vh, 0) rotate(0deg);
                 opacity: 0;
             }
 
@@ -70,20 +90,20 @@
             }
 
             25% {
-                transform: translate(30px, 20vh) rotate(45deg);
+                transform: translate3d(30px, 20vh, 0) rotate(45deg);
             }
 
             50% {
-                transform: translate(-30px, 50vh) rotate(135deg);
+                transform: translate3d(-30px, 50vh, 0) rotate(135deg);
                 opacity: 0.9;
             }
 
             75% {
-                transform: translate(30px, 80vh) rotate(225deg);
+                transform: translate3d(30px, 80vh, 0) rotate(225deg);
             }
 
             100% {
-                transform: translate(0, 110vh) rotate(360deg);
+                transform: translate3d(0, 110vh, 0) rotate(360deg);
                 opacity: 0;
             }
         }
@@ -93,36 +113,27 @@
             pointer-events: none;
             z-index: 5;
             animation: heartFlutter linear infinite;
+            /* Safari 호환 필터 경량화 */
+            -webkit-filter: drop-shadow(0 2px 4px rgba(255, 182, 193, 0.3));
             filter: drop-shadow(0 2px 4px rgba(255, 182, 193, 0.3));
             will-change: transform, opacity;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .animate-fade-in {
-            animation: fadeInUp 0.8s ease-out forwards;
+            animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* 동전 반짝임 */
         @keyframes coinSparkle {
 
             0%,
             100% {
-                filter: brightness(1) drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+                -webkit-filter: brightness(1);
+                filter: brightness(1);
             }
 
             50% {
-                filter: brightness(1.5) drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+                -webkit-filter: brightness(1.5);
+                filter: brightness(1.5);
             }
         }
 
@@ -136,28 +147,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transform: translateZ(0);
         }
 
-        /* Marquee 애니메이션 (제목 흐르기) */
         @keyframes marquee {
             0% {
-                transform: translateX(100%);
+                transform: translate3d(0, 0, 0);
             }
 
             100% {
-                transform: translateX(-100%);
+                transform: translate3d(-100%, 0, 0);
             }
         }
 
         .marquee-text {
             display: inline-block;
             white-space: nowrap;
-            animation: marquee 10s linear infinite;
+            animation: marquee 15s linear infinite;
+            will-change: transform;
         }
 
         .marquee-container {
             overflow: hidden;
             width: 100%;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
         }
 
         ::-webkit-scrollbar {
@@ -168,6 +182,8 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
             scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+            /* iOS 텍스트 크기 고정 */
         }
 
         .aips-logo-style {
@@ -180,6 +196,15 @@
             color: transparent;
             padding-right: 0.1em;
             display: inline-block;
+        }
+
+        /* Safari 투명도 버벅임 방지 패치 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            -webkit-backdrop-filter: blur(var(--safe-blur));
+            backdrop-filter: blur(var(--safe-blur));
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transform: translateZ(0);
         }
 
         .cursor-msg {
@@ -524,7 +549,7 @@
                 random: '무작위 재생', loopOne: '한곡 반복', loopAll: '전체 반복', sequential: '순차 재생', none: '반복 없음'
             };
 
-            return h('div', { className: 'fixed top-28 left-6 z-[100] bg-white/90 backdrop-blur-2xl p-6 rounded-[2.5rem] shadow-2xl border border-pink-100 flex flex-col gap-4 w-80 transition-all opacity-15 hover:opacity-100 group' },
+            return h('div', { className: 'fixed top-28 left-6 z-[100] glass-panel p-6 rounded-[2.5rem] shadow-2xl flex flex-col gap-4 w-[85vw] max-w-[320px] transition-all opacity-20 hover:opacity-100 group gpu-layer' },
                 h('div', { id: 'yt-player', className: 'hidden' }),
                 h('div', { className: 'flex flex-col gap-1 overflow-hidden' },
                     h('div', { className: 'flex justify-between items-center' },
@@ -576,16 +601,16 @@
                     setToast(true); setTimeout(() => setToast(false), 2500);
                 });
             };
-            return h('div', { onClick: handleCopy, className: 'group relative flex items-center justify-between p-8 bg-white/60 backdrop-blur-xl border border-white hover:border-pink-300 rounded-[3rem] transition-all duration-500 cursor-pointer hover:shadow-2xl hover:-translate-y-2 opacity-0 animate-fade-in shadow-xl', style: { animationDelay: `${delay}ms`, animationFillMode: 'forwards' } },
-                h('div', { className: 'flex items-center gap-7 text-left' },
-                    h('div', { className: 'text-5xl transition-transform duration-500 group-hover:scale-110' }, icon),
+            return h('div', { onClick: handleCopy, className: 'group relative flex flex-col md:flex-row items-center justify-between p-6 md:p-8 glass-panel rounded-[2.5rem] md:rounded-[3rem] transition-all duration-500 cursor-pointer hover:shadow-2xl hover:-translate-y-2 opacity-0 animate-fade-in shadow-xl gpu-layer mobile-full', style: { animationDelay: `${delay}ms`, animationFillMode: 'forwards' } },
+                h('div', { className: 'flex items-center gap-5 md:gap-7 text-left w-full md:w-auto mb-4 md:mb-0' },
+                    h('div', { className: 'text-4xl md:text-5xl transition-transform duration-500 group-hover:scale-110' }, icon),
                     h('div', { className: 'flex flex-col' },
-                        h('span', { className: 'text-[10px] font-black text-pink-400 uppercase tracking-tighter mb-1' }, label),
-                        h('span', { className: 'text-xl md:text-2xl font-black text-gray-800 break-keep' }, displayText)
+                        h('span', { className: 'text-[9px] md:text-[10px] font-black text-pink-400 uppercase tracking-tighter mb-1' }, label),
+                        h('span', { className: 'text-lg md:text-2xl font-black text-gray-800 break-keep' }, displayText)
                     )
                 ),
-                h('div', { className: 'bg-pink-500 text-white px-6 py-2.5 rounded-full text-[12px] font-black shadow-md group-hover:bg-pink-600 transition-all whitespace-nowrap' }, '클릭하여 복사'),
-                toast && h('div', { className: 'absolute -top-20 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-10 py-5 rounded-[2rem] shadow-2xl z-[200] whitespace-nowrap animate-bounce font-black border border-white/10' }, popupText || `${displayText}가 복사되었습니다.`)
+                h('div', { className: 'w-full md:w-auto bg-pink-500 text-white px-6 py-3 md:py-2.5 rounded-full text-[12px] font-black shadow-md group-hover:bg-pink-600 transition-all text-center' }, '클릭하여 복사'),
+                toast && h('div', { className: 'absolute -top-16 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-8 py-4 rounded-[2rem] shadow-2xl z-[200] whitespace-nowrap animate-bounce font-black border border-white/10' }, popupText || `${displayText}가 복사되었습니다.`)
             );
         };
 
@@ -593,57 +618,57 @@
             return h('div', { className: 'min-h-screen flex flex-col relative text-gray-900 selection:bg-pink-100 container-padding' },
                 h(InteractiveOverlay),
                 h(MusicPlayer),
-                h('header', { className: 'sticky top-0 z-40 w-full bg-white/60 backdrop-blur-2xl border-b border-white/50' },
-                    h('div', { className: 'max-w-7xl mx-auto px-10 h-24 flex items-center justify-between' },
-                        h('div', { className: 'text-4xl aips-logo-style' }, 'AIps'),
-                        h('nav', { className: 'flex items-center gap-6 md:gap-10' },
+                h('header', { className: 'sticky top-0 z-40 w-full glass-panel' },
+                    h('div', { className: 'max-w-7xl mx-auto px-6 md:px-10 h-20 md:h-24 flex items-center justify-between' },
+                        h('div', { className: 'text-3xl md:text-4xl aips-logo-style' }, 'AIps'),
+                        h('nav', { className: 'flex items-center gap-4 md:gap-10' },
                             [
-                                { icon: '☕', url: 'https://cafe.naver.com/aipscafe', label: 'Naver Cafe' },
+                                { icon: '☕', url: 'https://cafe.naver.com/aipscafe', label: 'Cafe' },
                                 { icon: '🎬', url: 'https://www.youtube.com/@A_I_ps', label: 'YouTube' },
-                                { icon: '📸', url: 'https://www.instagram.com/a_i_ps/', label: 'Instagram' },
+                                { icon: '📸', url: 'https://www.instagram.com/a_i_ps/', label: 'Insta' },
                                 { icon: '🎵', url: 'https://www.tiktok.com/@a_i_ps', label: 'TikTok' }
                             ].map((s, i) => h('a', { key: i, href: s.url, target: '_blank', rel: 'noopener noreferrer', className: 'flex flex-col items-center group' },
-                                h('span', { className: 'text-3xl group-hover:scale-125 transition-transform duration-300' }, s.icon),
-                                h('span', { className: 'text-[9px] font-black text-gray-400 mt-1 uppercase tracking-wider group-hover:text-pink-500' }, s.label)
+                                h('span', { className: 'text-2xl md:text-3xl group-hover:scale-125 transition-transform duration-300' }, s.icon),
+                                h('span', { className: 'text-[8px] md:text-[9px] font-black text-gray-400 mt-1 uppercase tracking-wider group-hover:text-pink-500 hidden md:block' }, s.label)
                             ))
                         )
                     )
                 ),
-                h('main', { className: 'flex-grow max-w-5xl mx-auto py-24 md:py-40 flex flex-col items-center text-center' },
-                    h('div', { className: 'relative mb-16' },
-                        h('div', { className: 'absolute inset-0 bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-300 rounded-full blur-[110px] opacity-30 animate-pulse' }),
-                        h('div', { className: 'relative w-64 h-64 md:w-80 md:h-80 rounded-full overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] border-[15px] border-white group' },
+                h('main', { className: 'flex-grow max-w-5xl mx-auto py-16 md:py-40 flex flex-col items-center text-center container-padding' },
+                    h('div', { className: 'relative mb-12 md:mb-16' },
+                        h('div', { className: 'absolute inset-0 bg-gradient-to-br from-pink-300 via-purple-300 to-indigo-300 rounded-full blur-[80px] md:blur-[110px] opacity-30 animate-pulse' }),
+                        h('div', { className: 'relative w-56 h-56 md:w-80 md:h-80 rounded-full overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] border-[10px] md:border-[15px] border-white group gpu-layer' },
                             h('img', { src: 'image/300_300.jpg', alt: 'AIps Logo', className: 'w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000' })
                         )
                     ),
-                    h('h1', { className: 'hero-title text-6xl md:text-8xl font-black mb-16 break-keep leading-tight tracking-tighter text-gray-800 flex flex-col items-center gap-y-6' },
-                        h('span', { className: 'logo-main aips-logo-style text-8xl md:text-[12rem] mb-4' }, 'AIps'),
+                    h('h1', { className: 'hero-title font-black mb-12 md:mb-16 break-keep tracking-tighter text-gray-800 flex flex-col items-center gap-y-4 md:gap-y-6' },
+                        h('span', { className: 'logo-main aips-logo-style mb-2 md:mb-4' }, 'AIps'),
                         h('span', { className: 'block' }, '후원에 감사드립니다.')
                     ),
-                    h('div', { className: 'w-full max-w-3xl space-y-10 mb-24' },
+                    h('div', { className: 'w-full max-w-3xl space-y-6 md:space-y-10 mb-20 md:mb-24 px-2 md:px-0' },
                         h(CopyItem, { label: '후원 계좌 (기업은행)', copyValue: '기업 040-086067-01-014', displayText: '조현우 (기업) 040-086067-01-014', delay: 100, icon: '🏦' })
                     ),
-                    h('div', { className: 'w-full bg-white/70 backdrop-blur-3xl rounded-[5rem] p-16 md:p-32 mb-24 border border-white shadow-2xl group transition-all hover:bg-white/90' },
-                        h('p', { className: 'text-2xl md:text-5xl font-bold text-gray-700 mb-10 break-keep leading-relaxed' },
+                    h('div', { className: 'w-full glass-panel rounded-[3rem] md:rounded-[5rem] p-10 md:p-32 mb-20 md:mb-24 group transition-all hover:bg-white/90 gpu-layer' },
+                        h('p', { className: 'text-xl md:text-5xl font-bold text-gray-700 mb-8 md:mb-10 break-keep leading-relaxed' },
                             "여러분의 구독과 좋아요,", h('br'), "후원에 제가 하루 하루를 살아갑니다."
                         ),
-                        h('p', { className: 'text-6xl md:text-9xl font-black text-pink-500 mb-20 animate-pulse' }, '사랑합니다.'),
-                        h('div', { className: 'text-base text-gray-500 space-y-8 font-medium break-keep' },
-                            h('p', { className: 'opacity-70 text-lg md:text-xl' }, '※. 금전 후원을 제외한 쿠폰 및 유통기한이 지나지 않은 기프티콘도 받고 있습니다.'),
-                            h('div', { className: 'inline-block px-12 md:px-20 py-8 bg-red-50 text-red-600 rounded-[3rem] font-black text-2xl md:text-4xl border border-red-100 shadow-lg' }, '너무 배가 고픕니다. 도와주세요.')
+                        h('p', { className: 'text-4xl md:text-9xl font-black text-pink-500 mb-12 md:mb-20 animate-pulse' }, '사랑합니다.'),
+                        h('div', { className: 'text-sm md:text-base text-gray-500 space-y-6 md:space-y-8 font-medium break-keep' },
+                            h('p', { className: 'opacity-70 text-base md:text-xl' }, '※. 금전 후원을 제외한 쿠폰 및 유통기한이 지나지 않은 기프티콘도 받고 있습니다.'),
+                            h('div', { className: 'inline-block px-8 md:px-20 py-5 md:py-8 bg-red-50 text-red-600 rounded-[2rem] md:rounded-[3rem] font-black text-lg md:text-4xl border border-red-100 shadow-lg' }, '너무 배가 고픕니다. 도와주세요.')
                         )
                     ),
-                    h('div', { className: 'w-full max-w-3xl space-y-8 mb-28' },
+                    h('div', { className: 'w-full max-w-3xl space-y-6 md:space-y-8 mb-24 md:mb-28 px-2 md:px-0' },
                         h(CopyItem, { label: 'Phone Number', copyValue: '01074920824', displayText: '010-7492-0824', delay: 300, icon: '📞' }),
                         h(CopyItem, { label: 'E-mail Address', copyValue: 'mrs86@naver.com', displayText: 'mrs86@naver.com', delay: 500, icon: '📧' })
                     ),
-                    h('div', { className: 'text-5xl font-black flex items-center gap-3 tracking-[0.4em] opacity-30 italic' },
-                        '- ', h('span', { className: 'aips-logo-style text-4xl' }, 'AIps'), ' 올림'
+                    h('div', { className: 'text-3xl md:text-5xl font-black flex items-center gap-3 tracking-[0.2em] md:tracking-[0.4em] opacity-30 italic' },
+                        '- ', h('span', { className: 'aips-logo-style text-2xl md:text-4xl' }, 'AIps'), ' 올림'
                     )
                 ),
-                h('footer', { className: 'w-full py-24 bg-white/30 backdrop-blur-sm border-t border-gray-100 text-center' },
-                    h('p', { className: 'text-gray-400 text-sm font-black tracking-widest uppercase flex items-center justify-center gap-3' },
-                        h('span', { className: 'aips-logo-style text-xs' }, 'AIps'), ' Copyright 2026. ', h('span', { className: 'text-pink-300 mx-2 animate-pulse' }, '♥'), ' Thank you for your kindness.'
+                h('footer', { className: 'w-full py-16 md:py-24 bg-white/20 backdrop-blur-sm border-t border-gray-100 text-center container-padding' },
+                    h('p', { className: 'text-gray-400 text-[10px] md:text-sm font-black tracking-widest uppercase flex items-center justify-center gap-2 md:gap-3 flex-wrap' },
+                        h('span', { className: 'aips-logo-style text-[8px] md:text-xs' }, 'AIps'), ' Copyright 2026. ', h('span', { className: 'text-pink-300 mx-1 md:mx-2 animate-pulse' }, '♥'), ' Thank you for your kindness.'
                     )
                 )
             );
