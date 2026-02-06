@@ -16,7 +16,8 @@
 
     <!-- CSS & Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@400;700;900&display=swap"
         rel="stylesheet">
 
     <style>
@@ -267,6 +268,55 @@
             cursor: pointer;
             border: 2px solid white;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 후원자 명단 스타일 */
+        .donor-font {
+            font-family: 'Noto Serif KR', serif;
+        }
+
+        .vvip-donor {
+            color: #d4af37;
+            background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 900;
+            display: inline-block;
+            position: relative;
+            animation: shimmer 2s infinite linear;
+            background-size: 200% auto;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .vvip-donor:hover {
+            animation: rainbow 1.5s infinite linear;
+            background-size: 200% auto;
+        }
+
+        @keyframes rainbow {
+            0% {
+                background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #3b82f6, #6366f1, #8b5cf6, #ec4899);
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+
+            100% {
+                background: linear-gradient(to right, #ec4899, #ef4444, #f59e0b, #10b981, #3b82f6, #6366f1, #8b5cf6);
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+        }
+
+        .donor-unit {
+            width: 100%;
+            max-width: 832px;
+            margin: 0 auto;
         }
     </style>
 </head>
@@ -626,6 +676,38 @@
             );
         };
 
+        const DonorsSection = () => {
+            // 초기 데이터: 이상옥 (고액 후원자)
+            const initialDonors = [
+                { name: "이상옥", isVvip: true }
+            ];
+
+            const donors = initialDonors;
+            const units = [];
+            for (let i = 0; i < donors.length; i += 50) {
+                units.push(donors.slice(i, i + 50));
+            }
+
+            return h('section', { className: 'w-full py-24 md:py-32' },
+                h('div', { className: 'max-w-[2496px] mx-auto px-6' },
+                    h('h2', { className: 'text-3xl md:text-5xl font-black text-gray-800 mb-16 text-center' }, '[도움 주신 분들]'),
+                    h('div', { className: 'flex flex-wrap justify-center gap-8 md:gap-12' },
+                        units.map((unit, unitIdx) =>
+                            h('div', { key: unitIdx, className: 'donor-unit glass-panel rounded-[2rem] p-8 md:p-12 shadow-xl flex flex-col gap-3 min-h-[400px]' },
+                                unit.map((donor, idx) =>
+                                    h('div', { key: idx, className: 'donor-font text-lg md:text-xl text-center break-keep w-full' },
+                                        h('span', {
+                                            className: donor.isVvip ? 'vvip-donor transition-all duration-300 cursor-default' : 'text-gray-600'
+                                        }, donor.name)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        };
+
         const App = () => {
             return h('div', { className: 'min-h-screen flex flex-col relative text-gray-900 selection:bg-pink-100 container-padding' },
                 h(InteractiveOverlay),
@@ -678,6 +760,7 @@
                         '- ', h('span', { className: 'aips-logo-style text-2xl md:text-4xl' }, 'AIps'), ' 올림'
                     )
                 ),
+                h(DonorsSection),
                 h('footer', { className: 'w-full py-16 md:py-24 bg-white/20 backdrop-blur-sm border-t border-gray-100 text-center container-padding' },
                     h('p', { className: 'text-gray-400 text-[10px] md:text-sm font-black tracking-widest uppercase flex items-center justify-center gap-2 md:gap-3 flex-wrap' },
                         h('span', { className: 'aips-logo-style text-[8px] md:text-xs' }, 'AIps'), ' Copyright 2026. ', h('span', { className: 'text-pink-300 mx-1 md:mx-2 animate-pulse' }, '♥'), ' Thank you for your kindness.'
